@@ -49,8 +49,8 @@ class HistoryList extends StatelessWidget {
             formattedTitle = 'Phone Number';
             iconData = Icons.phone;
                 break;
-              case 'WiFi Data':
-            formattedTitle = 'WiFi Data';
+              case 'WiFi':
+            formattedTitle = 'WiFi';
             iconData = Icons.wifi;
                 break;
               case 'Contact Data':
@@ -62,11 +62,21 @@ class HistoryList extends StatelessWidget {
             iconData = Icons.numbers;
                 break;
               case 'Text':
-            formattedTitle = 'Text';
-            iconData = Icons.text_snippet;
+                formattedTitle = 'Text';
+                iconData = Icons.text_snippet;
                 break;
-
-
+              case 'Email':
+                formattedTitle = 'Email';
+                iconData = Icons.email;
+                break;
+              case 'vCard':
+                formattedTitle = 'vCard';
+                iconData = Icons.person;
+                break;
+              case 'SMS':
+                formattedTitle = 'SMS';
+                iconData = Icons.sms;
+                break;
               case 'Barcode Product Number':
                 formattedTitle = 'Product';
                 iconData = Icons.production_quantity_limits;
@@ -85,6 +95,7 @@ class HistoryList extends StatelessWidget {
                 ],
               ),
               trailing: _popMenu(index, box, scan),
+              onTap: () => showResultDialog(context, scan.data),
             );
           },
         );
@@ -98,16 +109,28 @@ class HistoryList extends StatelessWidget {
   String checkStringType(String text) {
     final urlPatterns = [
       r"(https?|ftp)://([-A-Z0-9.]+)(/?[:]?\w+)*(/?[^#]*)#?([^?+]*?)?",
-      r"(www.)?[-A-Za-z0-9]+\.[A-Za-z]{2,}", // Simpler URL pattern
+      r"(www.)?[-A-Za-z0-9]+\.[A-Za-z]{2,}",
     ];
 
-    final phonePattern = r"^\d[\d\s-]{9,12}$";
-    final wifiPattern =
+    const phonePattern = r"^\d[\d\s-]{9,12}$";
+    const wifiPattern =
         r"^(?:([0-9]{1,3}\.){3}[0-9]{1,3})|(?:([0-9A-Fa-f]{1,2}:){5}[0-9A-Fa-f]{1,2})$"; // Basic WiFi pattern (IP or MAC address)
-    final emailPattern =
+    const emailPattern =
         r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[-a-zA-Z0-9]{0,61}[a-zA-Z0-9])?\.[a-zA-Z]{2,}$"; // Basic email pattern
-    final barcodePattern = r"^\d{8,13}$"; // Barcode pattern
+    const barcodePattern = r"^\d{8,13}$";
 
+    // Check for email (consider adding more specific contact data checks)
+    if (RegExp(emailPattern).hasMatch(text)||text.startsWith('mail')) {
+      return 'Email';
+    }
+    // Check for vCard
+    if (text.contains('BEGIN:VCARD') && text.contains('END:VCARD')) {
+      return 'vCard';
+    }
+    //Check for sms
+    if (text.startsWith('SMSTO:')) {
+      return 'SMS';
+    }
     // Check for URL first
     for (var pattern in urlPatterns) {
       if (RegExp(pattern).hasMatch(text)) {
@@ -119,16 +142,16 @@ class HistoryList extends StatelessWidget {
       return 'Barcode Product Number';
     }
     // Check for phone number
-    if (RegExp(phonePattern).hasMatch(text)) {
+    if (RegExp(phonePattern).hasMatch(text)||text.startsWith('tel')) {
       return 'Phone Number';
     }
 
     // Check for WiFi data
-    if (RegExp(wifiPattern).hasMatch(text)) {
-      return 'WiFi Data';
+    if (RegExp(wifiPattern).hasMatch(text)||text.startsWith('WIFI:S:')) {
+      return 'WiFi';
     }
 
-    // Check for email (consider adding more specific contact data checks)
+    // Check for Contact Data
     if (RegExp(emailPattern).hasMatch(text)) {
       return 'Contact Data';
     }
@@ -156,11 +179,11 @@ class HistoryList extends StatelessWidget {
             box.deleteAt(index);
             break;
           case 'open':
-            if (_isURL(scan.data)) {
+            // if (_isURL(scan.data)) {
               final Uri url = Uri.parse(scan.data);
               if (!await launchUrl(url)) {
                 throw Exception('Could not launch $url');
-              }
+              // }
             }
             break;
           case 'copy':
@@ -174,7 +197,7 @@ class HistoryList extends StatelessWidget {
           value: 'delete',
           child: Text('Delete'),
         ),
-        if (_isURL(scan.data))
+        // if (_isURL(scan.data))
           const PopupMenuItem(
             value: 'open',
             child: Text('Open'),
@@ -184,6 +207,101 @@ class HistoryList extends StatelessWidget {
           child: Text('Copy'),
         ),
       ],
+    );
+  }
+
+  void showResultDialog(BuildContext context, String text) {
+    String type = checkStringType(text);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Detected Type: $type'),
+          content: Text('Content: $text'),
+          actions: <Widget>[
+            if (type == 'URL') ...[
+              TextButton(
+                child: Text('Open URL'),
+                onPressed: () async {
+                  if (await canLaunch(text)) {
+                    await launch(text);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Could not launch URL')),
+                    );
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+            ] else if (type == 'Email') ...[
+              TextButton(
+                child: Text('Send Email'),
+                onPressed: () {
+                  final Uri emailUri = Uri(
+                    scheme: 'mailto',
+                    path: text,
+                  );
+                  launch(emailUri.toString());
+                  Navigator.of(context).pop();
+                },
+              ),
+            ] else if (type == 'Phone Number') ...[
+              TextButton(
+                child: Text('Call'),
+                onPressed: () {
+                  final Uri phoneUri = Uri(
+                    scheme: 'tel',
+                    path: text,
+                  );
+                  launch(phoneUri.toString());
+                  Navigator.of(context).pop();
+                },
+              ),
+            ] else if (type == 'SMS') ...[
+              TextButton(
+                child: Text('Send Sms'),
+                onPressed: () {
+                  final Uri phoneUri = Uri(
+                    scheme: 'SMSTO',
+                    path: text,
+                  );
+                  launch(phoneUri.toString());
+                  Navigator.of(context).pop();
+                },
+              ),
+            ] else if (type == 'vCard') ...[
+              TextButton(
+                child: const Text('Save Contact'),
+                onPressed: () {
+                  final Uri phoneUri = Uri(
+                    scheme: 'data:text/vcard;charset=utf-8,',
+                    path: text,
+                  );
+                  launch(phoneUri.toString());
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+            TextButton(
+              child: Text('Copy'),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: text));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Copied to clipboard')),
+                );
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

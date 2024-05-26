@@ -83,4 +83,5 @@ class ScanView extends GetView<ScanViewController> {
       ),
     );
   }
+
 }

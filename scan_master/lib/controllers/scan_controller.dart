@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:light/light.dart';
@@ -8,6 +9,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:qr_code_utils/qr_code_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:scan_master/services/setting_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/scan_model.dart';
 import '../services/storage_service.dart';
 
@@ -47,17 +49,7 @@ class ScanViewController extends GetxController {
         );
         StorageService.scanBox.add(newScan);
         qrController.pauseCamera(); // Pause after first scan
-        Get.snackbar("Scanned", "Data: ${scannedData.value}");
-        Get.defaultDialog(
-          title: 'Result',
-          content: Text(newScan.data),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
+        showResultDialog(newScan.data);
       }
     });
   }
@@ -103,16 +95,7 @@ class ScanViewController extends GetxController {
             dateTime: DateTime.now(),
           );
           StorageService.scanBox.add(newScan);
-          Get.defaultDialog(
-            title: 'Result',
-            content: Text(newScan.data),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(),
-                child: const Text('OK'),
-              ),
-            ],
-          );
+          showResultDialog(newScan.data);
         } else {
           Get.defaultDialog(
             title: 'Not Found',
@@ -173,4 +156,150 @@ class ScanViewController extends GetxController {
     qrController?.dispose();
     super.onClose();
   }
+
+  void showResultDialog( String text) {
+    String type = checkStringType(text);
+
+        Get.defaultDialog(
+          title: 'Detected Type: $type',
+          content: Text('Content: $text'),
+          actions: <Widget>[
+            if (type == 'URL') ...[
+              TextButton(
+                child: Text('Open URL'),
+                onPressed: () async {
+                    await launch(text);
+                },
+              ),
+            ] else if (type == 'Email') ...[
+              TextButton(
+                child: Text('Send Email'),
+                onPressed: () {
+                  final Uri emailUri = Uri(
+                    scheme: 'mailto',
+                    path: text,
+                  );
+                  launch(emailUri.toString());
+                 Get.back();
+                },
+              ),
+            ] else if (type == 'Phone Number') ...[
+              TextButton(
+                child: Text('Call'),
+                onPressed: () {
+                  final Uri phoneUri = Uri(
+                    scheme: 'tel',
+                    path: text,
+                  );
+                  launch(phoneUri.toString());
+                  Get.back();
+                },
+              ),
+            ] else if (type == 'SMS') ...[
+              TextButton(
+                child: Text('Send Sms'),
+                onPressed: () {
+                  final Uri phoneUri = Uri(
+                    scheme: 'SMSTO',
+                    path: text,
+                  );
+                  launch(phoneUri.toString());
+                  Get.back();
+                },
+              ),
+            ] else if (type == 'vCard') ...[
+              TextButton(
+                child: const Text('Save Contact'),
+                onPressed: () {
+                  final Uri phoneUri = Uri(
+                    scheme: 'data:text/vcard;charset=utf-8,',
+                    path: text,
+                  );
+                  launch(phoneUri.toString());
+                  Get.back();
+                },
+              ),
+            ],
+            TextButton(
+              child: Text('Copy'),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: text));
+                Get.showSnackbar(
+                  GetSnackBar(message: 'Copied to clipboard'),
+                );
+                Get.back();
+              },
+            ),
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Get.back();
+              },
+            ),
+          ],
+        );
+      }
+
+
+  String checkStringType(String text) {
+    final urlPatterns = [
+      r"(https?|ftp)://([-A-Z0-9.]+)(/?[:]?\w+)*(/?[^#]*)#?([^?+]*?)?",
+      r"(www.)?[-A-Za-z0-9]+\.[A-Za-z]{2,}",
+    ];
+
+    const phonePattern = r"^\d[\d\s-]{9,12}$";
+    const wifiPattern =
+        r"^(?:([0-9]{1,3}\.){3}[0-9]{1,3})|(?:([0-9A-Fa-f]{1,2}:){5}[0-9A-Fa-f]{1,2})$"; // Basic WiFi pattern (IP or MAC address)
+    const emailPattern =
+        r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[-a-zA-Z0-9]{0,61}[a-zA-Z0-9])?\.[a-zA-Z]{2,}$"; // Basic email pattern
+    const barcodePattern = r"^\d{8,13}$";
+
+    // Check for email (consider adding more specific contact data checks)
+    if (RegExp(emailPattern).hasMatch(text)||text.startsWith('mail')) {
+      return 'Email';
+    }
+    // Check for vCard
+    if (text.contains('BEGIN:VCARD') && text.contains('END:VCARD')) {
+      return 'vCard';
+    }
+    //Check for sms
+    if (text.startsWith('SMSTO:')) {
+      return 'SMS';
+    }
+    // Check for URL first
+    for (var pattern in urlPatterns) {
+      if (RegExp(pattern).hasMatch(text)) {
+        return 'URL';
+      }
+    }
+  
+    // Check for phone number
+    if (RegExp(phonePattern).hasMatch(text)||text.startsWith('tel')||text.startsWith('+')) {
+      return 'Phone Number';
+    }
+
+    // Check for WiFi data
+    if (RegExp(wifiPattern).hasMatch(text)||text.startsWith('WIFI:S:')) {
+      return 'WiFi';
+    }
+
+    // Check for Contact Data
+    if (RegExp(emailPattern).hasMatch(text)) {
+      return 'Contact Data';
+    }
+
+    // Check for barcode
+    if (RegExp(barcodePattern).hasMatch(text)) {
+      return 'Barcode Product Number';
+    }
+
+    // Check if all characters are numbers
+    if (text.split('').every((char) => RegExp(r'[0-9]').hasMatch(char))) {
+      return 'Number';
+    }
+
+    // Otherwise, consider it text
+    return 'Text';
+  }
+
 }
