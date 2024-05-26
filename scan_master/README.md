@@ -137,13 +137,12 @@ flutter:
 ## Ui 
 
 
-<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/e365376f-8096-4482-af54-989ab818aa41" height="500" width="200">
-<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/b8d7b7f6-85e0-44b3-93c8-f07975c44f15" height="500" width="200">
-<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/45b2f7f9-80b5-4f8a-b172-2035b0d05c4a" height="500" width="200">
-<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/89774204-df46-46eb-84f8-853bd537250f" height="500" width="200">
-<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/8b600b60-93fa-4b69-a886-26428a9e7472" height="500" width="200">
-<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/673afd72-7ab7-4d90-8b01-f038dd258d37" height="500" width="200">
-<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/6f57417f-f569-4c6d-b5ac-ffb1edeb465c" height="500" width="200">
+<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/e365376f-8096-4482-af54-989ab818aa41" height="400" width="200">
+<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/b8d7b7f6-85e0-44b3-93c8-f07975c44f15" height="400" width="200">
+<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/45b2f7f9-80b5-4f8a-b172-2035b0d05c4a" height="400" width="200">
+<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/8b600b60-93fa-4b69-a886-26428a9e7472" height="400" width="200">
+<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/673afd72-7ab7-4d90-8b01-f038dd258d37" height="400" width="200">
+<img src="https://github.com/Aj3322/CODECLAUSE/assets/114848454/6f57417f-f569-4c6d-b5ac-ffb1edeb465c" height="400" width="200">
 
 
 ## Contributions
