@@ -30,10 +30,15 @@ class PostCard extends GetView {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final width = MediaQuery.of(context).size.width;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        gradient: isDarkMode?null:LinearGradient(colors: ColorPalette.linearColor)
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16)
@@ -64,10 +69,10 @@ class PostCard extends GetView {
                         ),
                         Text(
                           DateFormat.yMMMd().format(post.createdAt),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 11,
-                            color: Color(0xFFB0A8A6),
+                            color: isDarkMode?null:Colors.black38,
                           ),
                         ),
                       ],
@@ -344,6 +349,7 @@ class _PostCState extends State<PostC> {
   @override
   Widget build(BuildContext context) {
     var h = MediaQuery.of(context).size.height;
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(

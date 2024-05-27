@@ -6,6 +6,7 @@ import 'package:social_media_app/app/data/models/user_model.dart';
 import 'package:social_media_app/app/ui/theme/color_palette.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../data/models/post_model.dart';
 import '../../widgets/comment_widget.dart';
 
 class CommentsPage extends GetView<CommentsController> {
@@ -17,6 +18,7 @@ class CommentsPage extends GetView<CommentsController> {
       TextEditingController();
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -33,64 +35,76 @@ class CommentsPage extends GetView<CommentsController> {
           ),
         ),
       ),
-      body: StreamBuilder(
-        stream: controller.getComments(postId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (ctx, index) => InkWell(
-              onTap: () {
-                Get.defaultDialog(
-                    title: '',
-                    contentPadding: const EdgeInsets.all(20),
-                    content: Column(
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Unfollow account"),
-                            IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                    Icons.person_remove_alt_1_outlined))
-                          ],
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Delete"),
-                            IconButton(
-                                onPressed: () {
-                                  controller.commentRepository.deleteComment(
-                                      snapshot.data![index].commentId,
-                                      snapshot.data![index].postId);
-                                  Get.back();
-                                },
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ))
-                          ],
-                        )
-                      ],
-                    ));
-              },
-              child: CommentCard(
-                commentModel: snapshot.data![index],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: isDarkMode
+              ? null
+              : LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: ColorPalette.linearColor,
+          ),
+        ),
+        child: StreamBuilder(
+          stream: controller.getComments(postId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (ctx, index) => InkWell(
+                onTap: () {
+                  Get.defaultDialog(
+                      title: '',
+                      contentPadding: const EdgeInsets.all(20),
+                      content: Column(
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Unfollow account"),
+                              IconButton(
+                                  onPressed: () {},
+                                  icon: const Icon(
+                                      Icons.person_remove_alt_1_outlined))
+                            ],
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Delete"),
+                              IconButton(
+                                  onPressed: () {
+                                    controller.commentRepository.deleteComment(
+                                        snapshot.data![index].commentId,
+                                        snapshot.data![index].postId);
+                                    Get.back();
+                                  },
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ))
+                            ],
+                          )
+                        ],
+                      ));
+                },
+                child: CommentCard(
+                  commentModel: snapshot.data![index],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
       // text input
-      bottomNavigationBar: SafeArea(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: SafeArea(
           child: Container(
         height: kToolbarHeight,
         margin:
@@ -114,12 +128,12 @@ class CommentsPage extends GetView<CommentsController> {
                         hintText: 'Write a Comments',
                         focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: ColorPalette.primaryColor)),
+                            borderSide: BorderSide(
+                                color:isDarkMode?ColorPalette.primaryColor:Colors.black38)),
                         enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                              color: ColorPalette.primaryColor,
+                            borderSide:  BorderSide(
+                              color:isDarkMode?ColorPalette.primaryColor:Colors.black38,
                             )),
                         // filled: true,
                         contentPadding: const EdgeInsets.all(8)
@@ -148,10 +162,11 @@ class CommentsPage extends GetView<CommentsController> {
                               replies: [],
                               isEdited: false,
                               isDeleted: false));
+                          commentEditingController.clear();
                         },
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.send,
-                          color: ColorPalette.primaryColor,
+                          color: isDarkMode?ColorPalette.primaryColor:Colors.black38,
                           size: 30,
                         ),
                       ),

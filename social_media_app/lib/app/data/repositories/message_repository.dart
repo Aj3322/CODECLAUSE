@@ -72,7 +72,7 @@ class ChatRepository {
   Future<void> syncMessage() async {
   }
 
-  Stream<List<UserModel>> getAllChatUser() {
-    return _remoteProvider.getAllChatUser();
+  Stream<List<UserModel>> getAllChatUser(List<String> chatUserId) {
+    return _remoteProvider.getAllChatUsers(chatUserId);
   }
 }

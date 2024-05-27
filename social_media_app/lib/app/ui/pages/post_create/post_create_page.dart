@@ -5,12 +5,14 @@ import 'package:get/get.dart';
 import 'dart:io';
 import '../../../controllers/post_create_controller.dart';
 import '../../../data/enum/enum.dart';
+import '../../theme/color_palette.dart';
 
 class PostCreatePage extends GetView<PostCreateController> {
   const PostCreatePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -36,84 +38,97 @@ class PostCreatePage extends GetView<PostCreateController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: controller.captionController,
-              decoration: const InputDecoration(
-                hintText: 'Write a caption...',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      body: Container(
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: isDarkMode
+              ? null
+              : LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: ColorPalette.linearColor,
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: controller.captionController,
+                decoration: InputDecoration(
+                  hintText: 'Write a caption...',
+                  hintStyle: TextStyle(color: isDarkMode?null:Colors.black),
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                ),
+                maxLines: 3,
+                onChanged: (value) {
+                  controller.captionController.text = value;
+                },
               ),
-              maxLines: 3,
-              onChanged: (value) {
-                controller.captionController.text = value;
-              },
-            ),
-            SizedBox(height: 20),
-            Obx(
-                  () {
-                if (controller.selectedFiles.isEmpty) {
-                  return GestureDetector(
-                    onTap: () => controller.selectFiles(context),
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Tap to select images or video',
-                          style: TextStyle(color: Colors.grey[600]),
+              SizedBox(height: 20),
+              Obx(
+                    () {
+                  if (controller.selectedFiles.isEmpty) {
+                    return GestureDetector(
+                      onTap: () => controller.selectFiles(context),
+                      child: Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Tap to select images or video',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                } else {
-                  return Column(
-                    children: [
-                      for (var file in controller.selectedFiles)
-                        if (controller.postType.value == PostType.image)
-                          Image.file(
-                            File(file.path),
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          )
-                        else
-                          Container(
-                            height: 200,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                Icons.videocam,
-                                color: Colors.grey[600],
-                                size: 100,
+                    );
+                  } else {
+                    return Column(
+                      children: [
+                        for (var file in controller.selectedFiles)
+                          if (controller.postType.value == PostType.image)
+                            Image.file(
+                              File(file.path),
+                              height: 200,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            )
+                          else
+                            Container(
+                              height: 200,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.videocam,
+                                  color: Colors.grey[600],
+                                  size: 100,
+                                ),
                               ),
                             ),
+                        SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: Icon(Icons.cancel, color: Colors.red),
+                            onPressed: controller.clearSelectedFiles,
                           ),
-                      SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          icon: Icon(Icons.cancel, color: Colors.red),
-                          onPressed: controller.clearSelectedFiles,
                         ),
-                      ),
-                    ],
-                  );
-                }
-              },
-            ),
-          ],
+                      ],
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

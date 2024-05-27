@@ -46,10 +46,11 @@ class PostRepository {
   Future<void> likePost(Post post) async {
     await _localProvider.updatePost(post);
     await _remoteProvider.likePost(post);
+
   }
 
-  List<Post> getPosts() {
-    return _localProvider.getPosts();
+  Future<Post> getPosts(String postId) {
+    return _remoteProvider.getPostByPostId(postId);
   }
 
   Stream<List<Post>> postStream() {

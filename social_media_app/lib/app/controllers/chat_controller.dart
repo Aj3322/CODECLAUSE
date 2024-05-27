@@ -28,8 +28,8 @@ class ChatController extends GetxController {
   Stream<List<MessageModel>>getAllMessages(UserModel userModel){
     return chatRepository.getMessage(userModel);
   }
-  Stream<List<UserModel>>getAllChatUser(){
-    return chatRepository.getAllChatUser();
+  Stream<List<UserModel>>getAllChatUser(UserModel user){
+    return chatRepository.getAllChatUser(user.chatUserIds??[]);
   }
 
   void sendMessage(UserModel receiverUser , MessageType contentType ,bool isFirstMessage) {
@@ -51,11 +51,13 @@ class ChatController extends GetxController {
             content: content,
             contentTypes: [contentType],
             timestamp: DateTime.now(),
-            isRead: true,
+            isRead: false,
             isDelivered: false
         );
         if(isFirstMessage) {
+
           chatRepository.sendMassage(message);
+          ServiceLocator.userRepository.addUserToChat(message.receiverId,message.senderId);
         }else{
           chatRepository.sendMassage(message);
         }

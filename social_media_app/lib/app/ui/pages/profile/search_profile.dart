@@ -8,6 +8,7 @@ import 'package:social_media_app/app/data/enum/enum.dart';
 import 'package:social_media_app/app/data/repositories/user_repository.dart';
 import 'package:social_media_app/app/services/database_service.dart';
 import 'package:social_media_app/app/ui/pages/home/home_page.dart';
+import '../../../controllers/profile_controller.dart';
 import '../../../data/models/post_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../routes/app_pages.dart';
@@ -29,11 +30,15 @@ class _ProfileScreenState extends State<SearchProfileScreen> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual);
+    setState(() {
+      isFollowing= widget.userModel.followers.contains(userRepository.userModel!.uid);
+      followers=widget.userModel.followers.length;
+    });
     print(widget.userModel.profilePicUrl);
   }
-
   UserRepository userRepository = ServiceLocator.userRepository;
-
+  bool isFollowing = false;
+  int followers=0;
   @override
   Widget build(BuildContext context) {
     return isLoading
@@ -129,16 +134,14 @@ class _ProfileScreenState extends State<SearchProfileScreen> {
                                                         .spaceEvenly,
                                                 children: [
                                                   buildStatColumn(
-                                                      widget.userModel.followers
-                                                          .length,
+                                                     followers,
                                                       "Followers"),
                                                   buildStatColumn(
                                                       widget.userModel.posts
                                                           .length,
                                                       "Posts"),
                                                   buildStatColumn(
-                                                      widget.userModel.following
-                                                          .length,
+                                                      widget.userModel.following.length,
                                                       "Following"),
                                                 ],
                                               ),
@@ -229,22 +232,38 @@ class _ProfileScreenState extends State<SearchProfileScreen> {
                                             Get.offNamed(Routes.LOGIN);
                                           },
                                         )
-                                      : widget.userModel.followers.contains(
-                                              FirebaseAuth
-                                                  .instance.currentUser!.uid)
+                                      : isFollowing
                                           ? FollowButton(
                                               text: 'Unfollow',
                                               backgroundColor: Colors.white,
                                               textColor: Colors.black,
                                               borderColor: Colors.grey,
-                                              function: () async {},
+                                              function: () async {
+                                               userRepository.unFollowUser(widget.userModel);
+                                               setState(() {
+                                                 isFollowing=false;
+                                                 if(!isFollowing){
+                                                   followers--;
+                                                 }
+                                               });
+                                             Get.find<ProfileController>().getData();
+                                              },
                                             )
                                           : FollowButton(
                                               text: 'Follow',
                                               backgroundColor: Colors.blue,
                                               textColor: Colors.white,
                                               borderColor: Colors.blue,
-                                              function: () async {},
+                                              function: () async {
+                                                userRepository.followUser(widget.userModel);
+                                                setState(() {
+                                                  isFollowing=true;
+                                                  if(isFollowing){
+                                                    followers++;
+                                                  }
+                                                });
+                                                Get.find<ProfileController>().getData();
+                                              },
                                             )
                                 ],
                               ),

@@ -1,5 +1,6 @@
 import 'package:social_media_app/app/data/repositories/comment_repository.dart';
 import 'package:social_media_app/app/data/repositories/message_repository.dart';
+import 'package:social_media_app/app/data/repositories/notification_repository.dart';
 import 'package:social_media_app/app/data/repositories/post_repository.dart';
 import 'package:social_media_app/app/data/repositories/storage_repo.dart';
 
@@ -18,6 +19,7 @@ class ServiceLocator {
   static final PostRepository postRepository = PostRepository();
   static final CommentRepository commentRepository = CommentRepository();
   static final ChatRepository chatRepository = ChatRepository();
+  static final NotificationRepository notificationRepository = NotificationRepository();
 }
 
 
@@ -39,7 +41,7 @@ class LocalDatabaseService {
     await Hive.initFlutter();
 
     // Register adapters
-    Hive.registerAdapter(UserAdapter());
+    Hive.registerAdapter(UserModelAdapter());
     Hive.registerAdapter(PostAdapter());
     Hive.registerAdapter(NotificationModelAdapter());
     Hive.registerAdapter(MessageModelAdapter());

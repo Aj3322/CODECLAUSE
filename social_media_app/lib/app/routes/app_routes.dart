@@ -9,6 +9,7 @@ abstract class Routes {
   static const PROFILE = '/profile';
   static const PROFILEUPDATE = '/profile-update';
   static const CHAT = '/chat';
+  static const CHATSCREEN = '/chat-screen';
   static const COMMENTS = '/comments';
   static const STORY = '/story';
   static const NOTIFICATIONS = '/notifications';

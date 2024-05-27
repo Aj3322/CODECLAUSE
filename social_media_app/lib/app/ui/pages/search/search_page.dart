@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:social_media_app/app/controllers/search_controller.dart';
 import 'package:social_media_app/app/data/models/user_model.dart';
 
+import '../../theme/color_palette.dart';
 import '../profile/search_profile.dart';
 
 class SearchPage extends GetView<SearchPageController> {
@@ -15,6 +16,7 @@ class SearchPage extends GetView<SearchPageController> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -23,7 +25,16 @@ class SearchPage extends GetView<SearchPageController> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: isDarkMode
+              ? null
+              : LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: ColorPalette.linearColor,
+          ),
+        ),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -31,6 +42,7 @@ class SearchPage extends GetView<SearchPageController> {
               controller: controller.searchTextController,
               decoration: InputDecoration(
                 hintText: 'Search by username or email...',
+                hintStyle: TextStyle(color: isDarkMode?null:Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),

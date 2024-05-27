@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:social_media_app/app/controllers/profile_controller.dart';
 import 'package:social_media_app/app/services/database_service.dart';
 
 import '../data/models/user_model.dart';
@@ -10,7 +11,6 @@ class SearchPageController extends GetxController {
   var searchResults = <UserModel>[].obs;
   var isLoading = false.obs;
   var topUsers = <UserModel>[].obs;
-
   final UserRepository userRepository = ServiceLocator.userRepository;
 
   void searchUsers(String query) async {

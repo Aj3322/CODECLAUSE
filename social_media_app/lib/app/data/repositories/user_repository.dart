@@ -79,6 +79,13 @@ class UserRepository {
     return _remoteProvider.fetchTopUsers();
   }
 
+  Future<void> followUser(UserModel userModel) {
+    return _remoteProvider.followUser(userModel).then((value) => _initializeUserModel(FirebaseAuth.instance.currentUser?.uid));
+  }
+  Future<void> unFollowUser(UserModel userModel) {
+    return _remoteProvider.unFollowUser(userModel).then((value) => _initializeUserModel(FirebaseAuth.instance.currentUser?.uid));
+  }
+
   Stream<UserModel> userStream(String id) {
     return _remoteProvider.userStream(id);
   }
@@ -90,5 +97,10 @@ class UserRepository {
   Future<void> updateUser(UserModel updatedUser) async {
     await _remoteProvider.updateUser(updatedUser);
     await _localProvider.updateUser(updatedUser);
+    _initializeUserModel(FirebaseAuth.instance.currentUser?.uid);
+  }
+
+  Future<void> addUserToChat(String receiverId,String senderId) async {
+   await _remoteProvider.addUserToChat(receiverId,senderId);
   }
 }

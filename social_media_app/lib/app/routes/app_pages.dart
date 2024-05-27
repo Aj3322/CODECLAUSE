@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:social_media_app/app/ui/pages/chat/Conversation_page.dart';
 import 'package:social_media_app/app/ui/pages/home/home_view.dart';
 import 'package:social_media_app/app/ui/pages/profile/profile_update.dart';
 import '../ui/pages/home/home_page.dart';
@@ -68,8 +69,12 @@ class AppPages {
     ),
     GetPage(
       name: Routes.CHAT,
-      page: () => ChatPage(),
+      page: () => const ChatPage(),
       binding: ChatBinding(),
+    ),
+    GetPage(
+      name: Routes.CHATSCREEN,
+      page: () => ChatScreenDetail(),
     ),
     GetPage(
       name: Routes.COMMENTS,

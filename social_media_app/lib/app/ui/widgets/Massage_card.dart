@@ -18,7 +18,7 @@ class MessageCard extends StatefulWidget {
 }
 
 class _MessageCardState extends State<MessageCard> {
-
+ MyDateUtil myDateUtil = MyDateUtil();
   @override
   Widget build(BuildContext context) {
     bool isMe = FirebaseAuth.instance.currentUser!.uid== widget.message.senderId;
@@ -98,7 +98,7 @@ class _MessageCardState extends State<MessageCard> {
           Padding(
             padding: EdgeInsets.only(left: mq.width * .15,top: 4),
             child: Text(
-              MyDateUtil.getFormattedTime(
+              MyDateUtil().getFormattedTime(
                   context: context, time: widget.message.timestamp.toLocal().toString()),
               style: const TextStyle(fontSize: 12, color: Colors.black54),
             ),
@@ -113,78 +113,66 @@ class _MessageCardState extends State<MessageCard> {
     print(widget.message.contentTypes.first.index);
     var mq = MediaQuery.of(context).size;
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Flexible(
-              child: Container(
-                constraints:  BoxConstraints(
-                    maxWidth: mq.width*0.7,
-                    minWidth: mq.width*0.15,
-                    minHeight: mq.height*.04,
-                    maxHeight: mq.height*0.4
-                ),
-                padding: EdgeInsets.all(widget.message.contentTypes.first == MessageType.image
-                    ? mq.width * .009
-                    : 10),
-                margin: EdgeInsets.symmetric(
-                    horizontal: mq.width * .04, vertical: mq.height * .01),
-                decoration: const BoxDecoration(
-                    color:ColorPalette.primaryColor,
-                    borderRadius: BorderRadius.all(Radius.circular(20),)),
-                child: widget.message.contentTypes.first == MessageType.text ?
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    for(int i =0 ;i<widget.message.content.length;i++)
-                    Text(
-                      widget.message.content[i],
-                      style: const TextStyle(fontSize: 15, color: Colors.white),
-                    ),
-                  ],
-                ) : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for(int i =0 ;i<widget.message.content.length;i++)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Image.network(widget.message.content[i]
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            //for adding some space
-
-
-            //double tick blue icon for message read
-            if (widget.message.isRead)
-              const Icon(Icons.done_all_rounded, color: Colors.blue, size: 15),
-
-            //for adding some space
-            const SizedBox(width: 2),
-
-            //sent time
-            Text(
-              MyDateUtil.getFormattedTime(
-                  context: context, time: widget.message.timestamp.toLocal().toString()),
-              style: const TextStyle(fontSize: 12, color: Colors.black54),
-            ),
-            SizedBox(width: mq.width * .07),
-          ],
-        ),
-      ],
-    );
+       children: [
+         Flexible(
+           child: Container(
+             constraints:  BoxConstraints(
+                 maxWidth: mq.width*0.7,
+                 minWidth: mq.width*0.1,
+                 minHeight: mq.height*.02,
+                 maxHeight: mq.height*0.4
+             ),
+             padding: EdgeInsets.all(widget.message.contentTypes.first == MessageType.image
+                 ? mq.width * .009
+                 : 7),
+             margin: EdgeInsets.symmetric(
+                 horizontal: mq.width * .04, vertical: mq.height * .01).copyWith(bottom: 0),
+             decoration: const BoxDecoration(
+                 color:ColorPalette.primaryColor,
+                 borderRadius: BorderRadius.only(topRight:Radius.circular(20),topLeft: Radius.circular(20),bottomLeft: Radius.circular(20))),
+             child: widget.message.contentTypes.first == MessageType.text ?
+             Column(
+               mainAxisSize: MainAxisSize.min,
+               crossAxisAlignment: CrossAxisAlignment.end,
+               children: [
+                 for(int i =0 ;i<widget.message.content.length;i++)
+                 Text(
+                   widget.message.content[i],
+                   style: const TextStyle(fontSize: 15, color: Colors.white),
+                 ),
+               ],
+             ) : Column(
+               mainAxisSize: MainAxisSize.min,
+               children: [
+                 for(int i =0 ;i<widget.message.content.length;i++)
+                 ClipRRect(
+                   borderRadius: BorderRadius.circular(15),
+                   child: Image.network(widget.message.content[i]
+                   ),
+                 ),
+               ],
+             ),
+           ),
+         ),
+         Row(
+           mainAxisAlignment: MainAxisAlignment.end,
+           mainAxisSize: MainAxisSize.min,
+           children: [
+             Icon(Icons.done_all_rounded, color: widget.message.isRead?Colors.blue:Colors.grey, size: 15),
+             const SizedBox(width: 2),
+             //sent time
+             Text(
+               myDateUtil.getFormattedTime(
+                   context: context, time: widget.message.timestamp.toLocal().toString()),
+               style: const TextStyle(fontSize: 12, color: Colors.grey),
+             ),
+             SizedBox(width: mq.width * .05),
+           ],
+         ),
+       ],
+     );
   }
 
   // bottom sheet for modifying message details
@@ -271,7 +259,7 @@ class _MessageCardState extends State<MessageCard> {
                 _OptionItem(
                     icon: const Icon(Icons.remove_red_eye, color: Colors.blue),
                     name:
-                    'Sent At: ${MyDateUtil.getMessageTime(context: context, time: widget.message.timestamp.toLocal().toString())}',
+                    'Sent At: ${myDateUtil.getMessageTime(context: context, time: widget.message.timestamp.toLocal().toString())}',
                     onTap: () {}),
 
                 //read time
@@ -279,7 +267,7 @@ class _MessageCardState extends State<MessageCard> {
                     icon: const Icon(Icons.remove_red_eye, color: Colors.green),
                     name: widget.message.isRead
                         ? 'Read At: Not seen yet'
-                        : 'Read At: ${MyDateUtil.getMessageTime(context: context, time: widget.message.toString())}',
+                        : 'Read At: ${myDateUtil.getMessageTime(context: context, time: widget.message.toString())}',
                     onTap: () {}),
               ],
             ),

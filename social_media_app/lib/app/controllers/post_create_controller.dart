@@ -1,17 +1,16 @@
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:social_media_app/app/controllers/profile_controller.dart';
 import 'package:social_media_app/app/data/enum/enum.dart';
 import 'package:social_media_app/app/data/models/user_model.dart';
 import 'package:social_media_app/app/data/repositories/post_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_trimmer/video_trimmer.dart';
-
 import '../data/models/post_model.dart';
 import '../services/database_service.dart';
 import '../ui/widgets/trime.dart';
@@ -103,6 +102,18 @@ class PostCreateController extends GetxController {
                   selectedFiles.value = pickedFiles;
                   postType.value = PostType.image;
                                 },
+              ),
+              SimpleDialogOption(
+                padding: const EdgeInsets.all(20),
+                child: const Text('Click from camera'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+                  if (pickedFile != null) {
+                    selectedFiles.value = [pickedFile];
+                    postType.value = PostType.image;
+                  }
+                },
               ),
               SimpleDialogOption(
                 padding: const EdgeInsets.all(20),
@@ -199,6 +210,7 @@ class PostCreateController extends GetxController {
         Get.snackbar('Success', 'Posted successfully');
         clearSelectedFiles();
         captionController.clear();
+        Get.find<ProfileController>().getData();
       } else {
         Get.snackbar('Error', res);
       }

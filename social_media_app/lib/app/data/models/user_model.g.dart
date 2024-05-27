@@ -6,7 +6,7 @@ part of 'user_model.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class UserAdapter extends TypeAdapter<UserModel> {
+class UserModelAdapter extends TypeAdapter<UserModel> {
   @override
   final int typeId = 1;
 
@@ -98,7 +98,7 @@ class UserAdapter extends TypeAdapter<UserModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UserAdapter &&
+      other is UserModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

@@ -68,18 +68,6 @@ class HomeView extends GetView<HomeController> {
                 ],
               );
             }
-            return Center(
-              child: Column(
-                children: [
-                  const Text('Nothing to show'),
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    label: const Text('Refresh'),
-                    icon: const Icon(Icons.refresh),
-                  )
-                ],
-              ),
-            );
           }
           return ListView.builder(
             itemCount: snapshot.data!.length,

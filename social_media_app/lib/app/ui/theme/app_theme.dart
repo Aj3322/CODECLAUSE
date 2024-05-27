@@ -9,7 +9,7 @@ class AppTheme {
     hintColor: ColorPalette.secondaryColor,
     backgroundColor: ColorPalette.backgroundColor,
     scaffoldBackgroundColor: ColorPalette.backgroundColor,
-    cardColor: ColorPalette.surfaceColor,
+    // cardColor: ColorPalette.surfaceColor,
     errorColor: ColorPalette.errorColor,
     textTheme: const TextTheme(
       displayLarge: TextStyle(color: ColorPalette.onBackgroundColor),

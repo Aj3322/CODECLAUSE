@@ -27,6 +27,12 @@ class NotificationModel {
   @HiveField(7)
   String senderId;
 
+  @HiveField(8)
+  String? postContent;
+
+  @HiveField(9)
+  String? postType;
+
   NotificationModel({
     required this.notificationId,
     required this.userId,
@@ -36,9 +42,10 @@ class NotificationModel {
     required this.type,
     this.postId,
     required this.senderId,
+    this.postContent,
+    this.postType,
   });
 
-  // Convert NotificationModel to a map for Hive
   Map<String, dynamic> toMap() {
     return {
       'notificationId': notificationId,
@@ -49,6 +56,8 @@ class NotificationModel {
       'type': type,
       'postId': postId,
       'senderId': senderId,
+      'postContent': postContent,
+      'postType': postType,
     };
   }
 
@@ -63,6 +72,8 @@ class NotificationModel {
       type: map['type'],
       postId: map['postId'],
       senderId: map['senderId'],
+      postContent: map['postContent'],
+      postType: map['postType'],
     );
   }
 }

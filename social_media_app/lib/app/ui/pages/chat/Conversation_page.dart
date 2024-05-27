@@ -11,8 +11,8 @@ import '../../../data/models/user_model.dart';
 import '../../widgets/Massage_card.dart';
 
 class ChatScreenDetail extends GetView<ChatController> {
-  final UserModel user;
-  ChatScreenDetail({super.key, required this.user});
+  ChatScreenDetail({super.key});
+  UserModel user=Get.arguments;
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;

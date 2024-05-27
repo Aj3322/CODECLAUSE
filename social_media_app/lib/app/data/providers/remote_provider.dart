@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:social_media_app/app/services/database_service.dart';
+import 'package:uuid/uuid.dart';
 import '../models/comment_model.dart';
 import '../models/notfication_model.dart';
 import '../models/post_model.dart';
@@ -18,7 +19,7 @@ class RemoteProvider {
   }
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+   String nfId='';
   // User methods
   Future<void> saveUser(UserModel user) async {
     try {
@@ -108,6 +109,9 @@ class RemoteProvider {
   // Post methods
   Future<void> savePost(Post post) async {
     await _firestore.collection('posts').doc(post.postId).set(post.toMap());
+    await _firestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
+      'posts': FieldValue.arrayUnion([post.postId])
+    });
   }
 
   Stream<List<Post>> getPosts() {
@@ -121,7 +125,11 @@ class RemoteProvider {
   }
 
   Future<void> deletePost(String postId) async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
     await _firestore.collection('posts').doc(postId).delete();
+    await _firestore.collection('users').doc(uid).update({
+      'posts': FieldValue.arrayRemove([uid])
+    });
   }
 
   Future<void> likePost(Post post) async {
@@ -137,11 +145,23 @@ class RemoteProvider {
         await postRef.update({
           'likes': FieldValue.arrayRemove([userModel.uid])
         });
+        deleteNotification(nfId).then((value) => nfId='');
       } else {
         // Like the post
         await postRef.update({
           'likes': FieldValue.arrayUnion([userModel.uid])
         });
+        nfId = const Uuid().v4();
+        sendNotification(NotificationModel(
+            notificationId: nfId,
+            userId: post.uid,
+            postType: post.postType.name,
+            postContent: post.content.first,
+            content: "Likes your post",
+            timestamp: DateTime.now(),
+            seen: false,
+            type: 'likes',
+            senderId: userModel.uid));
       }
     }
   }
@@ -285,6 +305,7 @@ class RemoteProvider {
     await commentRef.update({
       'likes': FieldValue.arrayUnion([userId])
     });
+
   }
 
   Future<void> likeReply(String commentId, String replyId, String userId) async {
@@ -335,9 +356,64 @@ class RemoteProvider {
     });
   }
 
-  Stream<List<UserModel>> getAllChatUser(){
+  Stream<List<UserModel>> getAllChatUsers(List<String> chatUserIds) {
     return _firestore
         .collection('users')
-        .where(FieldPath.documentId, whereIn: ServiceLocator.userRepository.userModel!.chatUserIds).snapshots().map((event) => event.docs.map((doc) => UserModel.fromMap(doc.data())).toList());
+        .where(FieldPath.documentId, whereIn: chatUserIds)
+        .snapshots()
+        .map((querySnapshot) {
+          print(querySnapshot.size);
+      return querySnapshot.docs.map((doc) {
+        return UserModel.fromMap(doc.data());
+      }).toList();
+    });
+  }
+
+
+  Future<void> unFollowUser(UserModel user) async {
+    final UserModel? userModel = ServiceLocator.userRepository.userModel;
+    await _firestore.collection('users').doc(user.uid).update({
+      'followers': FieldValue.arrayRemove([userModel!.uid])
+    });
+    await _firestore.collection('users').doc(user.uid).update({
+      'following': FieldValue.arrayRemove([user.uid])
+    });
+  }
+  Future<void> followUser(UserModel user) async {
+    final UserModel? userModel = ServiceLocator.userRepository.userModel;
+    await _firestore.collection('users').doc(user.uid).update({
+      'followers': FieldValue.arrayUnion([userModel!.uid])
+    });
+    await _firestore.collection('users').doc(userModel.uid).update({
+      'following': FieldValue.arrayUnion([user.uid])
+    });
+   sendNotification(NotificationModel(
+        notificationId: const Uuid().v4(),
+        userId: user.uid,
+        content: "@${userModel.username} Started following you",
+        timestamp: DateTime.now(),
+        seen: false,
+        type: 'following',
+        senderId: userModel.uid));
+  }
+
+  Future<Post> getPostByPostId(String postId) async {
+    final docSnapshot = await _firestore.collection('posts')
+        .doc(postId)
+        .get();
+    if (docSnapshot.exists) {
+      return Post.fromMap(docSnapshot.data()!);
+    } else {
+      throw Exception('Post not found');
+    }
+  }
+
+  addUserToChat(String receiverId,String senderId) async {
+    await _firestore.collection('users').doc(receiverId).update({
+      'chatUserIds': FieldValue.arrayUnion([senderId])
+    });
+    await _firestore.collection('users').doc(senderId).update({
+      'chatUserIds': FieldValue.arrayUnion([receiverId])
+    });
   }
 }

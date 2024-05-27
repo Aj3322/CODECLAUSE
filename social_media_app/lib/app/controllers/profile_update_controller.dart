@@ -3,13 +3,12 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:social_media_app/app/controllers/home_controller.dart';
+import 'package:social_media_app/app/controllers/profile_controller.dart';
 import 'package:social_media_app/app/data/repositories/storage_repo.dart';
 import 'package:social_media_app/app/data/repositories/user_repository.dart';
 import 'package:social_media_app/app/services/database_service.dart';
-import 'package:social_media_app/app/ui/pages/home/home_view.dart';
 import '../data/models/user_model.dart';
 import 'dart:io';
-import 'package:path/path.dart';
 class ProfileUpdateController extends GetxController {
   final StorageRepo storageRepository = ServiceLocator.storageRepository;
   final UserRepository userRepository = ServiceLocator.userRepository;
@@ -79,6 +78,7 @@ class ProfileUpdateController extends GetxController {
 
       await ServiceLocator.userRepository.updateUser(updatedUser);
       Get.find<HomeController>().getUser();
+      Get.find<ProfileController>().getData();
       Get.back(); // Close the profile update page
     }
   }

@@ -22,7 +22,7 @@ class LocalProvider {
   static const String _messageBox = 'messageBox';
 
   Future<void> init() async {
-    Hive.registerAdapter(UserAdapter());
+    Hive.registerAdapter(UserModelAdapter());
     Hive.registerAdapter(PostAdapter());
     Hive.registerAdapter(NotificationModelAdapter());
     Hive.registerAdapter(MessageModelAdapter());
